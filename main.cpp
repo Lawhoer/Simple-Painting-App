@@ -57,31 +57,19 @@ void curserColor() {
 			break;
 		}
 	}
-
 	//cout << "x: " << mouse_x << "y: " << mouse_y << endl;
 }
 void Screen() {
+	int n = 0;
 	// þimdi bütün konsolun icini doldurucaz
 	for (int i = 0; i < width * height; i++) {
 		screen[i].Char.UnicodeChar = 0x2588;
-		if (i < 5)
-			screen[i].Attributes = 0x0001; // MAVÝ
-		else if (i < 10)
-			screen[i].Attributes = 0x0002; // YESIL
-		else if (i < 15)
-			screen[i].Attributes = 0x0003; // TURKUAZ
-		else if (i < 20)
-			screen[i].Attributes = 0x0004; // KIRMIZI 
-		else if (i < 25)
-			screen[i].Attributes = 0x0005; // MOR
-		else if (i < 30)
-			screen[i].Attributes = 0x0006; // SARI
-		else if (i < 35)
-			screen[i].Attributes = 0x0007; // BEYAZ
-		else if (i < 40)
-			screen[i].Attributes = 0x0008; // GRÝ
-		else if (i < 45)
-			screen[i].Attributes = 0x0009; // ACIK MAVI
+
+		if (i < 45 && i / 5 < 10) {
+			if (i % 5==0)
+				n++;
+			screen[i].Attributes = n;
+		}
 		else
 			screen[i].Attributes = 0x0000;
 	}
