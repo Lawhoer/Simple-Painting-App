@@ -22,6 +22,7 @@ stack<vector<CHAR_INFO> > z;
 
 int mouse_x;
 int mouse_y;
+unsigned int mouse_c=0;
 
 enum Color { MAVI = 1, YESIL, TURKUAZ, KIRMIZI, MOR, SARI, BEYAZ, GRI, ACIKMAVI, ACIKYESIL, ACIKTURKUAZ, ACIKKIRMIZI, ACIKMOR, ACIKSARI, ACIKBEYAZ };
 Color color = BEYAZ;
@@ -115,6 +116,32 @@ void Screen() {
 			screen[i].Attributes = 0x0007;
 	}
 }
+void save() {
+	for (int i = 0; i < width * height; i++) {
+
+		temp[i] = screen[i];
+	}
+
+	z.push(temp);
+}
+void alan() {
+	save();
+	for (int i = 0; i < mouse_c * 4; i++) {
+		screen[(mouse_y - mouse_c) * width + (mouse_x - 2 * mouse_c + i)].Attributes = color;
+		screen[(mouse_y + mouse_c) * width + (mouse_x - 2 * mouse_c + i)].Attributes = color;
+	}
+	for (int i = 0; i < mouse_c * 2; i++) {
+		screen[(mouse_y - mouse_c + i) * width + (mouse_x - 2 * mouse_c)].Attributes = color;
+		screen[(mouse_y - mouse_c + i) * width + (mouse_x + 2 * mouse_c)].Attributes = color;
+	}
+	WriteConsoleOutput(hOut, screen, { short(width), short(height) }, { 0, 0 }, &s);
+	Sleep(100);
+	for (int i = 0; i < width * height; i++) {
+		screen[i].Char.UnicodeChar = z.top()[i].Char.UnicodeChar;
+		screen[i].Attributes = z.top()[i].Attributes;
+	}
+	z.pop();
+}
 void Setup() {
 	mouse_x = 0;
 	mouse_y = 0;
@@ -140,7 +167,6 @@ void Setup() {
 	Screen();
 
 	for (int i = 0; i < width * height; i++) {
-
 		temp.push_back(screen[i]);
 	}
 
@@ -161,17 +187,34 @@ void Logic() {
 			curserColor();
 		}
 
+		if (in[i].Event.MouseEvent.dwEventFlags == MOUSE_WHEELED) {
+			if (in[i].Event.MouseEvent.dwButtonState == 7864320) { // yukari
+				if(mouse_c<15)
+					mouse_c++;
+				alan();
+			}
+			if (in[i].Event.MouseEvent.dwButtonState == 4287102976) { // asagi
+				if(mouse_c >0)
+					mouse_c--;
+				alan();
+			}
+		}
+
 		if (in[i].Event.MouseEvent.dwButtonState == FROM_LEFT_1ST_BUTTON_PRESSED) {
-			screen[mouse_y * width + mouse_x].Attributes = color;
+			
+			if (mouse_c > 0) {
+				for (int i = 0; i < mouse_c * 4; i++) {
+					for (int j = 0; j < mouse_c * 2; j++) {
+						screen[(mouse_y + j - mouse_c) * width + (mouse_x - 2 * mouse_c + i)].Attributes = color;
+					}
+				}
+			}
+			else
+				screen[mouse_y * width + mouse_x].Attributes = color;
 			isPressedL = true;
 		}
 		else if (isPressedL) {
-			for (int i = 0; i < width * height; i++) {
-
-				temp[i] = screen[i];
-			}
-
-			z.push(temp);
+			save();
 			isPressedL = false;
 		}
 
@@ -180,12 +223,7 @@ void Logic() {
 			isPressedR = true;
 		}
 		else if (isPressedR) {
-			for (int i = 0; i < width * height; i++) {
-
-				temp[i] = screen[i];
-			}
-
-			z.push(temp);
+			save();
 			isPressedR = false;
 		}
 
