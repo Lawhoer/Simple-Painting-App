@@ -29,7 +29,9 @@ Color color = BEYAZ;
 
 bool isPressedL;
 bool isPressedR;
-
+bool CanI(CHAR_INFO* temp) {
+	return (temp > &screen[0] && temp < &screen[width * height]) ? true : false;
+}
 void curserColor() {
 	if (mouse_x < 70 && mouse_y < 1) {
 		int temp = mouse_x / 5;
@@ -127,15 +129,19 @@ void save() {
 void alan() {
 	save();
 	for (int i = 0; i < mouse_c * 4; i++) {
-		screen[(mouse_y - mouse_c) * width + (mouse_x - 2 * mouse_c + i)].Attributes = color;
-		screen[(mouse_y + mouse_c) * width + (mouse_x - 2 * mouse_c + i)].Attributes = color;
+		if(CanI(&screen[(mouse_y - mouse_c) * width + (mouse_x - 2 * mouse_c + i)]))
+			screen[(mouse_y - mouse_c) * width + (mouse_x - 2 * mouse_c + i)].Attributes = color;
+		if(CanI(&screen[(mouse_y + mouse_c) * width + (mouse_x - 2 * mouse_c + i)]))
+			screen[(mouse_y + mouse_c) * width + (mouse_x - 2 * mouse_c + i)].Attributes = color;
 	}
 	for (int i = 0; i < mouse_c * 2; i++) {
-		screen[(mouse_y - mouse_c + i) * width + (mouse_x - 2 * mouse_c)].Attributes = color;
-		screen[(mouse_y - mouse_c + i) * width + (mouse_x + 2 * mouse_c)].Attributes = color;
+		if(CanI(&screen[(mouse_y - mouse_c + i) * width + (mouse_x - 2 * mouse_c)]))
+			screen[(mouse_y - mouse_c + i) * width + (mouse_x - 2 * mouse_c)].Attributes = color;
+		if(CanI(&screen[(mouse_y - mouse_c + i) * width + (mouse_x + 2 * mouse_c)]))
+			screen[(mouse_y - mouse_c + i) * width + (mouse_x + 2 * mouse_c)].Attributes = color;
 	}
 	WriteConsoleOutput(hOut, screen, { short(width), short(height) }, { 0, 0 }, &s);
-	Sleep(100);
+	Sleep(50);
 	for (int i = 0; i < width * height; i++) {
 		screen[i].Char.UnicodeChar = z.top()[i].Char.UnicodeChar;
 		screen[i].Attributes = z.top()[i].Attributes;
@@ -205,13 +211,15 @@ void Logic() {
 			if (mouse_c > 0) {
 				for (int i = 0; i < mouse_c * 4; i++) {
 					for (int j = 0; j < mouse_c * 2; j++) {
-						screen[(mouse_y + j - mouse_c) * width + (mouse_x - 2 * mouse_c + i)].Attributes = color;
+							if (CanI(&screen[(mouse_y + j - mouse_c) * width + (mouse_x - 2 * mouse_c + i)]))
+								screen[(mouse_y + j - mouse_c) * width + (mouse_x - 2 * mouse_c + i)].Attributes = color;
 					}
 				}
 			}
 			else
 				screen[mouse_y * width + mouse_x].Attributes = color;
 			isPressedL = true;
+			
 		}
 		else if (isPressedL) {
 			save();
@@ -252,8 +260,6 @@ int main() {
 	while (1) {
 		Input();
 		Logic();
-		//cout << z.size() << endl;
 		WriteConsoleOutput(hOut, screen, { short(width), short(height) }, { 0, 0 }, &s);
 	}
-	return 0;
 }
